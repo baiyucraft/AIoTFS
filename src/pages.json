@@ -1,0 +1,96 @@
+{
+	"easycom": {
+		"autoscan": true,
+		"custom": {
+			"^s-(.*)": "@/sheep/components/s-$1/s-$1.vue",
+			"^su-(.*)": "@/sheep/ui/su-$1/su-$1.vue",
+			"^y-(.*)": "@/components/y-$1/index.vue"
+		}
+	},
+	"pages": [{
+			"path": "pages/index/index",
+			"aliasPath": "/",
+			"style": {
+				"navigationBarTitleText": "首页",
+				"enablePullDownRefresh": true
+			},
+			"meta": {
+				"auth": false,
+				"sync": true,
+				"title": "首页",
+				"group": "首页"
+			}
+		},{
+			"path": "pages/index/user",
+			"style": {
+				"navigationBarTitleText": "我的",
+				"enablePullDownRefresh": true
+			},
+			"meta": {
+				"auth": false,
+				"sync": true,
+				"title": "我的",
+				"group": "首页"
+			}
+		}
+	],
+	"subPackages": [
+		{
+			"root": "pages/model",
+			"pages": [{
+				"path": "index/index",
+				"style": {
+					"navigationBarTitleText": "模型列表"
+				},
+				"meta": {
+					"auth": false,
+					"sync": true,
+					"title": "模型列表",
+					"group": "模型"
+				}
+			},{
+				"path":"mid/index",
+				"style":{
+					"navigationBarTitleText":"模型详情"
+				},
+				"meta":{
+					"auth":false,
+					"sync":true,
+					"title":"模型详情",
+					"group":"模型"
+				}
+			},{
+				"path": "usemodel/index",
+				"style": {
+					"navigationBarTitleText": "使用模型"
+				},
+				"meta": {
+					"auth": false,
+					"sync": true,
+					"title": "使用模型",
+					"group": "模型"
+				}
+			}
+		]
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "芋道商城",
+		"navigationBarBackgroundColor": "#FFFFFF",
+		"backgroundColor": "#FFFFFF",
+		"navigationStyle": "custom"
+	},
+	"tabBar": {
+		"list": [{
+				"pagePath": "pages/index/index"
+			},
+			{
+				"pagePath": "pages/model/index/index"
+			},
+			{
+				"pagePath": "pages/index/user"
+			}
+		]
+	}
+}

@@ -1,0 +1,236 @@
+<template>
+  <view
+    class="page-app"
+    :class="['theme-' + sys.state.mode, 'main-' + sys.state.theme, 'font-' + sys.state.fontSize]"
+  >
+    <view class="page-main" :style="[bgMain]">
+      <!-- 默认通用顶部导航栏 -->
+      <su-navbar
+        v-if="navbar === 'normal'"
+        :title="title"
+        statusBar
+        :color="color"
+        :tools="tools"
+        :opacityBgUi="opacityBgUi"
+        @search="(e) => emits('search', e)"
+        :defaultSearch="defaultSearch"
+      />
+
+      <!-- 装修组件导航栏-普通 -->
+      <s-custom-navbar
+        v-else-if="navbar === 'custom' && navbarMode === 'normal'"
+        :data="navbarStyle"
+        :showLeftButton="showLeftButton"
+      />
+      <view class="page-body" :style="[bgBody]">
+        <!-- 沉浸式头部 -->
+        <su-inner-navbar v-if="navbar === 'inner'" :title="title" />
+        <view
+          v-if="navbar === 'inner'"
+          :style="[{ paddingTop: sheep.$platform.navbar + 'px' }]"
+        ></view>
+
+        <!-- 装修组件导航栏-沉浸式 -->
+        <s-custom-navbar v-if="navbar === 'custom' && navbarMode === 'inner'" :data="navbarStyle" :showLeftButton="showLeftButton" />
+
+        <!-- 页面内容插槽 -->
+        <slot />
+
+        <!-- 底部导航 -->
+        <y-tabbar v-if="tabbar !== ''" :path="tabbar" />
+      </view>
+    </view>
+
+    <view class="page-modal">
+      <!-- 全局授权弹窗 -->
+      <y-auth-modal />
+      <!-- 全局分享弹窗 -->
+      <y-share-modal :shareInfo="shareInfo" />
+      <!-- 全局快捷入口 -->
+      <y-menu-tools />
+    </view>
+  </view>
+</template>
+
+<script setup>
+import { computed } from 'vue'
+import yu from '@yu'
+import { isEmpty } from 'lodash'
+import { onShow } from '@dcloudio/uni-app'
+// #ifdef MP-WEIXIN
+import { onShareAppMessage as onShareApp } from '@dcloudio/uni-app'
+// #endif
+
+const props = defineProps({
+  title: {
+    type: String,
+    default: ''
+  },
+  navbar: {
+    type: String,
+    default: 'normal'
+  },
+  opacityBgUi: {
+    type: String,
+    default: 'bg-white'
+  },
+  color: {
+    type: String,
+    default: ''
+  },
+  tools: {
+    type: String,
+    default: 'title'
+  },
+  keyword: {
+    type: String,
+    default: ''
+  },
+  navbarStyle: {
+    type: Object,
+    default: () => ({
+      mode: '',
+      type: '',
+      color: '',
+      src: '',
+      list: [],
+      alwaysShow: 0
+    })
+  },
+  bgStyle: {
+    type: Object,
+    default: () => ({
+      src: '',
+      color: 'var(--ui-BG-1)'
+    })
+  },
+  tabbar: {
+    type: [String, Boolean],
+    default: ''
+  },
+  onShareAppMessage: {
+    type: [Boolean, Object],
+    default: true
+  },
+  leftWidth: {
+    type: [Number, String],
+    default: 100
+  },
+  rightWidth: {
+    type: [Number, String],
+    default: 100
+  },
+  defaultSearch: {
+    type: String,
+    default: ''
+  },
+  // 展示返回按钮
+  showLeftButton: {
+    type: Boolean,
+    default: false
+  }
+})
+const emits = defineEmits(['search'])
+
+const sysStore = yu.$store.useSysStore()
+const sys = computed(() => sysStore)
+
+// 导航栏模式(因为有自定义导航栏 需要计算)
+const navbarMode = computed(() => {
+  if (props.navbar === 'normal' || props.navbarStyle.mode === 'normal') {
+    return 'normal'
+  }
+  return 'inner'
+})
+
+// 背景1
+const bgMain = computed(() => {
+  if (navbarMode.value === 'inner') {
+    return {
+      background: `${props.bgStyle.backgroundColor} url(${yu.$url.cdn(
+        props.bgStyle.backgroundImage
+      )}) no-repeat top center / 100% auto`
+    }
+  }
+  return {}
+})
+
+// 背景2
+const bgBody = computed(() => {
+  if (navbarMode.value === 'normal') {
+    return {
+      background: `${props.bgStyle.backgroundColor} url(${yu.$url.cdn(
+        props.bgStyle.backgroundImage
+      )}) no-repeat top center / 100% auto`
+    }
+  }
+  return {}
+})
+
+// 分享信息
+const shareInfo = computed(() => {
+  if (props.onShareAppMessage === true) {
+    return yu.$platform.share.getShareInfo()
+  } else {
+    if (!isEmpty(props.onShareAppMessage)) {
+      yu.$platform.share.updateShareInfo(props.onShareAppMessage)
+      return props.onShareAppMessage
+    }
+  }
+  return {}
+})
+
+// #ifdef MP-WEIXIN
+// 微信小程序分享
+onShareApp(() => {
+  return {
+    title: shareInfo.value.title,
+    path: shareInfo.value.path,
+    imageUrl: shareInfo.value.image
+  }
+})
+// #endif
+
+onShow(() => {
+  if (!isEmpty(shareInfo.value)) {
+    yu.$platform.share.updateShareInfo(shareInfo.value)
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+  .page-app {
+    position: relative;
+    color: var(--ui-TC);
+    background-color: var(--ui-BG-1) !important;
+    z-index: 2;
+    display: flex;
+    width: 100%;
+    height: 100vh;
+
+    .page-main {
+      position: absolute;
+      z-index: 1;
+      width: 100%;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+
+      .page-body {
+        width: 100%;
+        position: relative;
+        z-index: 1;
+        flex: 1;
+      }
+
+      .page-img {
+        width: 100vw;
+        height: 100vh;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 0;
+      }
+    }
+  }
+</style>
